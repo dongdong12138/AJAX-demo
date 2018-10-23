@@ -17,24 +17,27 @@ window.jQuery.ajax = function ({url, method, body, successFn, failFn, headers}) 
 
     // es6 解构赋值
     // 下面这一行等价于上面六行
+    // let {url, method, body, successFn, failFn, headers} = options
     
-
-    let request = new XMLHttpRequest()
-    request.open(method, url) // 配置request
-    for (let key in headers) {
-        let value = headers[key]
-        request.setRequestHeader(key, value)
-    }
-    request.onreadystatechange = () => {
-        if (request.readyState === 4) {
-            if (request.status >= 200 && request.status < 300) {
-                successFn.call(undefined, request.responseText)
-            } else if (request.status >= 400) {
-                failFn.call(undefined, request)
+    return new Promise (function(resolve, reject) {
+        let request = new XMLHttpRequest()
+        request.open(method, url) // 配置request
+        for (let key in headers) {
+            let value = headers[key]
+            request.setRequestHeader(key, value)
+        }
+        request.onreadystatechange = () => {
+            if (request.readyState === 4) {
+                if (request.status >= 200 && request.status < 300) {
+                    resolve.call(undefined, request.responseText)
+                } else if (request.status >= 400) {
+                    reject.call(undefined, request)
+                }
             }
         }
-    }
-    request.send(body)
+        request.send(body)
+    })
+    
 }
 
 window.$ = window.jQuery
@@ -49,15 +52,9 @@ myButton.addEventListener('click', (e) => {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'frank': '18'
-        },
-        successFn: (x) => {
-            f1.call(undefined, x)
-            f2.call(undefined, x)
-        },
-        failFn: () => {
-            console.log(x)
-            console.log(x.status)
-            console.log(x.responseText)
         }
-    })
+    }).then(
+        (text) => {console.log(text)},
+        (request) => {console.log(request)}
+    )
 })
